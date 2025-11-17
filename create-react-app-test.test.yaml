@@ -43,7 +43,7 @@ steps:
     command:
       id: 29929fdd-d926-4320-b50b-194ef95c9406
       type: AI_ASSERTION
-      assertion: we are on the momentic landing page
+      assertion: we are not on the momentic landing page
       useVision: false
       filterByViewport: false
       cancelOnFailure: false
