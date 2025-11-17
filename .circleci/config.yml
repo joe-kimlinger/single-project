@@ -55,4 +55,6 @@ workflows:
       - run-tests
       - upload-results:
           requires:
-            - run-tests
+            - run-tests:
+              - success
+              - failed
