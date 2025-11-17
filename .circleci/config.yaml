@@ -1,0 +1,58 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.0.2
+
+jobs:
+  run-tests:
+    parallelism: 2
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages
+
+      - run:
+          name: Install browsers
+          command: npx momentic install-browsers --all
+
+      - run:
+          name: Run tests
+          command: |
+            npx momentic run \
+              --output-dir test-results/shard-${CIRCLE_NODE_INDEX} \
+              --shard-index $(($CIRCLE_NODE_INDEX+1)) \
+              --shard-count ${CIRCLE_NODE_TOTAL}
+
+      - store_artifacts:
+          when: always
+          path: ./test-results
+
+      - persist_to_workspace:
+          when: always
+          root: .
+          paths:
+            - test-results
+
+  upload-results:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Merge test results
+          command: npx momentic results merge --output-dir test-results/merged test-results
+
+      - run:
+          name: Upload test results
+          command: npx momentic results upload test-results/merged
+
+workflows:
+  test:
+    jobs:
+      - run-tests
+      - upload-results:
+          requires:
+            - run-tests
